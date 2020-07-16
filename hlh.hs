@@ -282,7 +282,8 @@ getHumanAgeOfCatFromHouse =
 
 findOldestCat :: [House] -> Maybe Cat
 findOldestCat [] = Nothing
-findOldestCat houses = Just oldestCat
+findOldestCat houses =
+     Just oldestCat
     where
         oldestCat
          = getCatFromHouse houseWithOldestCat
@@ -293,3 +294,209 @@ findOldestCat houses = Just oldestCat
         catAgeComparer (House _ (Cat _ _ age1))
                        (House _ (Cat _ _ age2))
          = compare age2 age1 
+
+--CHAPTER 15
+-- very weird chapter
+
+
+-- with type def
+helloString :: String
+helloString = "Hello"
+
+hello :: IO ()
+hello = putStrLn("Hello")
+
+n1 :: Int
+n1 = 1
+
+n2 :: Int
+n2 = 1
+
+sumNums :: Int -> Int -> Int
+sumNums x y = x + y
+
+-- or
+theAnswerNumber :: Integer
+theAnswerNumber = 3000+ 2000
+
+-- main :: IO ()
+-- main = print theAnswerNumber
+
+productOfInt :: Integer
+productOfInt = 33*398
+
+-- main :: IO ()
+-- main = print productOfInt
+
+sentence :: String
+sentence = "This sentence is False"
+
+otherSentence :: String
+otherSentence = "No it's not"
+
+addMonthToYear :: Int -> Int
+addMonthToYear x = 2020+x
+
+addNumbers :: Int
+addNumbers = 5+7+8+9
+
+
+-- main :: IO ()
+-- main = print addNumbers
+
+-- CHAPTER 16
+
+main :: IO ()
+main = do
+    putStrLn "You are in the fridge. What do you want to do ?"
+    putStrLn "1. Try to get out"
+    putStrLn "2. Eat."
+    putStrLn "3. Die."
+    command <- getLine
+    case command of
+        "1" ->
+            putStrLn "You try to get out. You fail you die."
+        "2" ->
+            putStrLn "You eat too much food. You die"
+        "3" ->
+            putStrLn "You die"
+        _ ->
+            putStrLn "Did not understand. So you die"
+    putStrLn "Play again? write y for yes"
+    playAgain <- getLine
+    if playAgain == "y"
+    then main
+    else putStrLn "Thanks for playing"
+
+--CHAPTER 17
+
+--type Name = String
+type Year = Int
+-- data Person = Person Name Name Year
+--     deriving (Show)
+
+--type Name = String
+--type Year = Int
+
+
+
+
+data Person = Person 
+     { personFirstName :: Name
+     , personLastName :: Name
+     , yearOfBirth:: Year}
+    deriving (Show)
+
+
+blaise :: Person
+blaise = Person "Blaise" "Pascal" 1623
+
+blaise' :: Person
+blaise' =      
+    Person { personFirstName = "Blaise"
+            , personLastName = "Pascal"
+            , yearOfBirth = 1623 }
+
+traise :: Person
+traise =  blaise' 
+    { personFirstName = "Traise"}
+
+people :: [Person]
+people =
+  [ Person "Isaac" "Newton" 1643
+  , Person "Leonard" "Euler" 1707
+  , Person "Blaise" "Pascal" 1623
+  , Person "Ada" "Lovelace" 1815
+  , Person "Alan" "Turing" 1912
+  , Person "Haskell" "Curry" 1900
+  , Person "John" "von Neumann" 1903
+  , Person "Lipot" "Fejer" 1880
+  , Person "Grace" "Hopper" 1906
+  , Person "Anita" "Borg" 1949
+  , Person "Karen" "Sparck Jones" 1935
+  , Person "Henriette" "Avram" 1919 ]
+
+
+firstAfter1900 :: Maybe Person
+firstAfter1900 = 
+    L.find(\(Person _ _ year) -> year == 1900) people
+
+
+firstNameBeginsWithL :: Person -> Bool
+firstNameBeginsWithL p = 
+    case personFirstName p of 
+        'L':_ -> True
+        _     -> False
+
+makeNewListWithOnlyLPeople :: [Person] -> [Person]
+makeNewListWithOnlyLPeople [] = []
+makeNewListWithOnlyLPeople (x:xs)
+    | firstNameBeginsWithL x = 
+       x : makeNewListWithOnlyLPeople xs
+    | otherwise =
+        makeNewListWithOnlyLPeople xs
+
+makeNewListWithOnlyLPeople' :: [Person] -> [Person]
+makeNewListWithOnlyLPeople' xs = 
+    filter firstNameBeginsWithL xs
+
+
+
+
+firstLetterIs :: Char -> String -> Bool
+firstLetterIs c "" = False
+firstLetterIs c (x:_) = c == x
+
+firstNameBeginsWith :: Char -> Person -> Bool
+firstNameBeginsWith c p =
+    firstLetterIs c firstName
+    where firstName = personFirstName p
+
+peopleThatBeginWithL'' :: [Person]
+peopleThatBeginWithL'' =
+    filter (firstNameBeginsWith 'K') people
+
+peopleThatBeginWithL = makeNewListWithOnlyLPeople' people
+
+mapPeople :: (Person -> String) -> [Person] -> [String]
+mapPeople f [] = []
+mapPeople f (x:xs) = 
+    f x : mapPeople f xs
+
+-- peopleToFirstNames :: [Person] -> [String]
+-- peopleToFirstNames people =
+--     mapPeople personFirstName people
+
+peopleToFirstNames :: [Person] -> [String]
+peopleToFirstNames = mapPeople personFirstName
+
+firstNames :: [String]
+firstNames = map personFirstName people
+
+
+sortedFirstName :: [String]
+sortedFirstName = L.sort firstNames
+
+sortedFirstName' :: [String]
+sortedFirstName' = reverse(L.sort firstNames)
+
+sortedFirstName'' :: [String]
+sortedFirstName'' = L.sortBy reverseCompare firstNames
+    where reverseCompare = flip compare
+
+yearsSinceBirthAtYear :: Year -> Person -> Int
+yearsSinceBirthAtYear y p = y - yearOfBirth p
+
+allYearsSinceBirth :: [Int]
+allYearsSinceBirth = 
+    map (yearsSinceBirthAtYear 2020) people
+
+earliestYearOfBirth :: [Person] -> Int
+earliestYearOfBirth people =
+    minimum (L.map yearOfBirth people)
+
+bornFirst :: [Person] -> Person
+bornFirst people =
+    L.minimumBy compareBirthYears people
+  where compareBirthYears x y =
+          compare (yearOfBirth x) (yearOfBirth y)
